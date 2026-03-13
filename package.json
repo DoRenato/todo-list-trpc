@@ -1,5 +1,5 @@
 {
-  "name": "zztemplate",
+  "name": "todo-list-trpc",
   "version": "0.1.0",
   "private": true,
   "scripts": {
