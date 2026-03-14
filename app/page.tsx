@@ -1,39 +1,23 @@
-"use client";
-
 import Link from "next/link";
-import { trpc } from "@/lib/trpc/provider";
 import TaskList from "@/components/task-list";
+import { trpcServer } from "@/lib/trpc/server";
 
-export default function HomePage() {
-  const {
-    data: tasks,
-    isLoading,
-    error,
-  } = trpc.task.list.useQuery();
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const tasks = await trpcServer.task.list();
 
   return (
-    <main style={{ padding: "24px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "24px",
-        }}
-      >
-        <h1>Lista de tarefas</h1>
-        <Link href="/new">Nova tarefa</Link>
+    <main className="container mx-auto">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <h1 className="pt-10 text-2xl">Lista de tarefas</h1>
+
+        <Link href="/new" className="text-blue-500">
+          Nova tarefa
+        </Link>
+
+        <TaskList tasks={tasks} />
       </div>
-
-      {isLoading && <p>Carregando tarefas...</p>}
-
-      {error && (
-        <p style={{ color: "red" }}>
-          Erro ao carregar tarefas: {error.message}
-        </p>
-      )}
-
-      {!isLoading && !error && tasks && <TaskList tasks={tasks} />}
     </main>
   );
 }
