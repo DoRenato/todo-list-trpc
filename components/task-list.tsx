@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc/provider";
 import { TaskType } from "@/lib/data/tasks";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Pencil, Trash } from "lucide-react";
+import { toast } from "sonner";
 
 type TaskListProps = {
   tasks: TaskType[];
@@ -22,6 +32,7 @@ export default function TaskList({ tasks }: TaskListProps) {
 
   function handleDelete(id: string) {
     deleteTask.mutate({ id });
+    toast("Tarefa excluída com sucesso!");
   }
 
   if (tasks.length === 0) {
@@ -29,27 +40,36 @@ export default function TaskList({ tasks }: TaskListProps) {
   }
 
   return (
-    <ul>
+    <ul className="flex flex-col gap-5">
       {tasks.map((task) => (
-        <li key={task.id} style={{ marginBottom: "20px" }}>
-          <strong>{task.titulo}</strong>
+        <li key={task.id}>
+          <Card className="mx-auto w-xl min-w-sm p-4">
+            <CardHeader>
+              <CardAction className="flex gap-5">
+                <Link
+                  href={`/edit/${task.id}`}
+                  className="hover:text-yellow-500"
+                >
+                  <Pencil />
+                </Link>
 
-          {task.descricao && <p>{task.descricao}</p>}
-
-          <small>
-            Criada em: {new Date(task.dataCriacao).toLocaleString("pt-BR")}
-          </small>
-
-          <div>
-            <Link href={`/edit/${task.id}`}>Editar</Link>
-
-            <button
-              onClick={() => handleDelete(task.id)}
-              disabled={deleteTask.isPending}
-            >
-              {deleteTask.isPending ? "Excluindo..." : "Excluir"}
-            </button>
-          </div>
+                <button
+                  onClick={() => handleDelete(task.id)}
+                  disabled={deleteTask.isPending}
+                  className="hover:cursor-pointer hover:text-red-500"
+                >
+                  {deleteTask.isPending ? "Excluindo..." : <Trash />}
+                </button>
+              </CardAction>
+              <CardTitle>{task.titulo}</CardTitle>
+              <CardDescription>
+                Criada em: {new Date(task.dataCriacao).toLocaleString("pt-BR")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {task.descricao && <p>{task.descricao}</p>}
+            </CardContent>
+          </Card>
         </li>
       ))}
     </ul>
