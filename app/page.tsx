@@ -1,65 +1,202 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { trpc } from "@/lib/trpc/provider";
 
 export default function Home() {
+  const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+
+  const utils = trpc.useUtils();
+
+  const {
+    data: tasks,
+    isLoading,
+    error,
+  } = trpc.task.list.useQuery();
+
+  const createTask = trpc.task.create.useMutation({
+    onSuccess: async () => {
+      resetForm();
+      await utils.task.list.invalidate();
+    },
+  });
+
+  const updateTask = trpc.task.update.useMutation({
+    onSuccess: async () => {
+      resetForm();
+      await utils.task.list.invalidate();
+    },
+  });
+
+  const deleteTask = trpc.task.delete.useMutation({
+    onSuccess: async () => {
+      if (editingTaskId) {
+        const deletedTaskStillExists = tasks?.some((task) => task.id === editingTaskId);
+
+        if (!deletedTaskStillExists) {
+          resetForm();
+        }
+      }
+
+      await utils.task.list.invalidate();
+    },
+  });
+
+  function resetForm() {
+    setTitulo("");
+    setDescricao("");
+    setEditingTaskId(null);
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const tituloFormatado = titulo.trim();
+    const descricaoFormatada = descricao.trim() || undefined;
+
+    if (!tituloFormatado) {
+      return;
+    }
+
+    if (editingTaskId) {
+      updateTask.mutate({
+        id: editingTaskId,
+        titulo: tituloFormatado,
+        descricao: descricaoFormatada,
+      });
+
+      return;
+    }
+
+    createTask.mutate({
+      titulo: tituloFormatado,
+      descricao: descricaoFormatada,
+    });
+  }
+
+  function handleDelete(id: string) {
+    deleteTask.mutate({ id });
+  }
+
+  function handleEdit(task: {
+    id: string;
+    titulo: string;
+    descricao?: string;
+  }) {
+    setEditingTaskId(task.id);
+    setTitulo(task.titulo);
+    setDescricao(task.descricao ?? "");
+  }
+
+  const isSubmitting = createTask.isPending || updateTask.isPending;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div style={{ padding: "24px" }}>
+      <h1>Lista de tarefas</h1>
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ marginTop: "16px", marginBottom: "24px" }}
+      >
+        <div style={{ marginBottom: "12px" }}>
+          <label htmlFor="titulo">Título</label>
+          <br />
+          <input
+            id="titulo"
+            type="text"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            placeholder="Digite o título da tarefa"
+          />
+        </div>
+
+        <div style={{ marginBottom: "12px" }}>
+          <label htmlFor="descricao">Descrição</label>
+          <br />
+          <textarea
+            id="descricao"
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            placeholder="Digite a descrição da tarefa"
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting
+              ? editingTaskId
+                ? "Salvando..."
+                : "Criando..."
+              : editingTaskId
+              ? "Salvar edição"
+              : "Criar tarefa"}
+          </button>
+
+          {editingTaskId && (
+            <button type="button" onClick={resetForm} disabled={isSubmitting}>
+              Cancelar edição
+            </button>
+          )}
+        </div>
+
+        {createTask.error && (
+          <p style={{ color: "red", marginTop: "12px" }}>
+            Erro ao criar: {createTask.error.message}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        )}
+
+        {updateTask.error && (
+          <p style={{ color: "red", marginTop: "12px" }}>
+            Erro ao editar: {updateTask.error.message}
+          </p>
+        )}
+      </form>
+
+      {isLoading && <p>Carregando...</p>}
+
+      {error && <p>Erro ao carregar tarefas: {error.message}</p>}
+
+      {!isLoading && !error && tasks?.length === 0 && (
+        <p>Nenhuma tarefa cadastrada.</p>
+      )}
+
+      {!isLoading && !error && tasks && tasks.length > 0 && (
+        <ul>
+          {tasks.map((task) => (
+            <li key={task.id} style={{ marginBottom: "16px" }}>
+              <strong>{task.titulo}</strong>
+
+              {task.descricao && <p>{task.descricao}</p>}
+
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={() => handleEdit(task)}
+                  disabled={isSubmitting || deleteTask.isPending}
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDelete(task.id)}
+                  disabled={deleteTask.isPending || isSubmitting}
+                >
+                  {deleteTask.isPending ? "Excluindo..." : "Excluir"}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {deleteTask.error && (
+        <p style={{ color: "red", marginTop: "12px" }}>
+          Erro ao excluir: {deleteTask.error.message}
+        </p>
+      )}
     </div>
   );
 }
