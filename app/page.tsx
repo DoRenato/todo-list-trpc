@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { trpc } from "@/lib/trpc/provider";
-import { TaskList } from "@/components/task-list";
+import TaskList from "@/components/task-list";
 
 export default function HomePage() {
-  const { data, isLoading, error } = trpc.task.list.useQuery();
+  const {
+    data: tasks,
+    isLoading,
+    error,
+  } = trpc.task.list.useQuery();
 
   return (
     <main style={{ padding: "24px" }}>
@@ -21,11 +25,15 @@ export default function HomePage() {
         <Link href="/new">Nova tarefa</Link>
       </div>
 
-      {isLoading && <p>Carregando...</p>}
+      {isLoading && <p>Carregando tarefas...</p>}
 
-      {error && <p style={{ color: "red" }}>Erro: {error.message}</p>}
+      {error && (
+        <p style={{ color: "red" }}>
+          Erro ao carregar tarefas: {error.message}
+        </p>
+      )}
 
-      {!isLoading && !error && data && <TaskList tasks={data} />}
+      {!isLoading && !error && tasks && <TaskList tasks={tasks} />}
     </main>
   );
 }

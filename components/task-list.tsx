@@ -2,16 +2,13 @@
 
 import Link from "next/link";
 import { trpc } from "@/lib/trpc/provider";
+import { TaskType } from "@/types/taskType";
 
 type TaskListProps = {
-  tasks: Array<{
-    id: string;
-    titulo: string;
-    descricao?: string;
-  }>;
+  tasks: TaskType[];
 };
 
-export function TaskList({ tasks }: TaskListProps) {
+export default function TaskList({ tasks }: TaskListProps) {
   const utils = trpc.useUtils();
 
   const deleteTask = trpc.task.delete.useMutation({
@@ -31,13 +28,16 @@ export function TaskList({ tasks }: TaskListProps) {
   return (
     <ul>
       {tasks.map((task) => (
-        <li key={task.id} style={{ marginBottom: "16px" }}>
+        <li key={task.id} style={{ marginBottom: "20px" }}>
           <strong>{task.titulo}</strong>
 
           {task.descricao && <p>{task.descricao}</p>}
-          <p>ID: {task.id}</p>
 
-          <div style={{ display: "flex", gap: "8px" }}>
+          <small>
+            Criada em: {new Date(task.dataCriacao).toLocaleString("pt-BR")}
+          </small>
+
+          <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
             <Link href={`/edit/${task.id}`}>Editar</Link>
 
             <button
