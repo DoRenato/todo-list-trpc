@@ -46,10 +46,8 @@ export function updateTask(id: string, titulo?: string, descricao?: string) {
   if (titulo !== undefined) {
     task.titulo = titulo;
   }
-
-  if (descricao !== undefined) {
-    task.descricao = descricao;
-  }
+ 
+  task.descricao = descricao;
 
   return task;
 }

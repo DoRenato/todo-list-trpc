@@ -8,6 +8,7 @@ import {
   createTask,
   updateTask,
   deleteTask,
+  getTaskById,
 } from "@/lib/data/tasks";
 
 // Cria o router de tarefas.
@@ -25,7 +26,7 @@ export const taskRouter = router({
       z.object({
         titulo: z.string().trim().min(1, "O título é obrigatório"),
         descricao: z.string().trim().optional(),
-      })
+      }),
     )
     .mutation(({ input }) => {
       return createTask(input.titulo, input.descricao);
@@ -38,7 +39,7 @@ export const taskRouter = router({
         id: z.string(),
         titulo: z.string().trim().min(1, "O título é obrigatório").optional(),
         descricao: z.string().trim().optional(),
-      })
+      }),
     )
     .mutation(({ input }) => {
       try {
@@ -48,7 +49,8 @@ export const taskRouter = router({
         // Apenas pra padronizar o formato de erro da api.
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: error instanceof Error ? error.message : "Erro ao atualizar tarefa",
+          message:
+            error instanceof Error ? error.message : "Erro ao atualizar tarefa",
         });
       }
     }),
@@ -58,7 +60,7 @@ export const taskRouter = router({
     .input(
       z.object({
         id: z.string(),
-      })
+      }),
     )
     .mutation(({ input }) => {
       try {
@@ -66,8 +68,26 @@ export const taskRouter = router({
       } catch (error) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: error instanceof Error ? error.message : "Erro ao deletar tarefa",
+          message:
+            error instanceof Error ? error.message : "Erro ao deletar tarefa",
         });
       }
+    }),
+
+  getById: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(({ input }) => {
+      const task = getTaskById(input.id);
+      if (!task) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Tarefa não encontrada",
+        });
+      }
+      return task;
     }),
 });
