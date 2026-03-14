@@ -18,3 +18,7 @@ export const router = t.router;
 // Exporta uma função/helper para criar procedures públicas.
 // Procedure = uma operação da API, como list, create, update...
 export const publicProcedure = t.procedure;
+
+// Exporta uma função/helper para criar callers.
+// Caller = cliente para chamar procedures do servidor.
+export const createCallerFactory = t.createCallerFactory;
