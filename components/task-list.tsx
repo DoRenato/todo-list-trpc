@@ -1,19 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc/provider";
-import { TaskType } from "@/types/taskType";
+import { TaskType } from "@/lib/data/tasks";
 
 type TaskListProps = {
   tasks: TaskType[];
 };
 
 export default function TaskList({ tasks }: TaskListProps) {
+  const router = useRouter();
   const utils = trpc.useUtils();
 
   const deleteTask = trpc.task.delete.useMutation({
     onSuccess: async () => {
       await utils.task.list.invalidate();
+      router.refresh();
     },
   });
 
@@ -37,11 +40,10 @@ export default function TaskList({ tasks }: TaskListProps) {
             Criada em: {new Date(task.dataCriacao).toLocaleString("pt-BR")}
           </small>
 
-          <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+          <div>
             <Link href={`/edit/${task.id}`}>Editar</Link>
 
             <button
-              type="button"
               onClick={() => handleDelete(task.id)}
               disabled={deleteTask.isPending}
             >

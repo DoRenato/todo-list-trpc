@@ -7,8 +7,6 @@ import { FormValues } from "@/features/schema";
 import { TituloField } from "@/components/TituloField";
 import { DescricaoField } from "@/components/DescricaoField";
 
-
-
 type FormTaskProps = {
   initialData?: Partial<FormValues>;
   onSubmit: (data: FormValues) => void;
@@ -37,7 +35,7 @@ export default function FormTask({
         <br />
         <br />
         <div>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Salvando..." : submitLabel}
           </Button>
         </div>
