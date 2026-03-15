@@ -1,11 +1,13 @@
 import Link from "next/link";
-import TaskList from "@/components/task-list";
 import { trpcServer } from "@/lib/trpc/server";
+import TaskListInfinite from "@/components/task-list-infinite";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const tasks = await trpcServer.task.list();
+  const initialTasks = await trpcServer.task.list({
+    limit: 5,
+  });
 
   return (
     <main className="container mx-auto">
@@ -16,7 +18,7 @@ export default async function HomePage() {
           Nova tarefa
         </Link>
 
-        <TaskList tasks={tasks} />
+        <TaskListInfinite initialData={initialTasks} />
       </div>
     </main>
   );

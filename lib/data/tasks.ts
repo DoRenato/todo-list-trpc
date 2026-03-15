@@ -60,3 +60,20 @@ export function deleteTask(id: string) {
 
   return deletedTask;
 }
+
+export function getTasksPaginated(limit: number, cursor?: number) {
+  const sortedTasks = [...taskStore.tasks].sort(
+    (a, b) => b.dataCriacao - a.dataCriacao,
+  );
+
+  const startIndex = cursor ?? 0;
+  const items = sortedTasks.slice(startIndex, startIndex + limit);
+
+  const nextCursor =
+    startIndex + limit < sortedTasks.length ? startIndex + limit : null;
+
+  return {
+    items,
+    nextCursor,
+  };
+}

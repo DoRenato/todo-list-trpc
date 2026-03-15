@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 // Importa os helpers criados no arquivo base do tRPC.
 import { router, publicProcedure } from "../trpc";
 import {
-  getTasks,
+  getTasksPaginated,
   createTask,
   updateTask,
   deleteTask,
@@ -15,9 +15,16 @@ import {
 export const taskRouter = router({
   // Procedure para listar todas as tarefas.
   // Usando query pois não altera dados, apenas busca.
-  list: publicProcedure.query(() => {
-    return getTasks();
-  }),
+  list: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(20).default(5),
+        cursor: z.number().optional(),
+      }),
+    )
+    .query(({ input }) => {
+      return getTasksPaginated(input.limit, input.cursor);
+    }),
 
   // Procedure para criar uma tarefa.
   // Usando mutation pois altera dados.
