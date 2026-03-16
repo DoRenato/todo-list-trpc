@@ -79,9 +79,9 @@ export default function TaskListInfinite({
     toast("Tarefa excluída com sucesso!");
   }
 
-  if (status === "pending") {
-    return <p>Carregando tarefas...</p>;
-  }
+//   if (status === "pending") {  // Possivel erro de execução
+//     return <p>Carregando tarefas...</p>;
+//   }
 
   if (status === "error") {
     return <p className="text-red-500">Erro ao carregar tarefas.</p>;

@@ -6,6 +6,7 @@ import { useFormTask } from "@/features/useFormTask";
 import { FormValues } from "@/features/schema";
 import { TituloField } from "@/components/TituloField";
 import { DescricaoField } from "@/components/DescricaoField";
+import { useEffect } from "react";
 
 type FormTaskProps = {
   initialData?: Partial<FormValues>;
@@ -21,6 +22,13 @@ export default function FormTask({
   submitLabel = "Salvar",
 }: FormTaskProps) {
   const form = useFormTask({ defaultValues: initialData });
+
+  useEffect(() => {
+    form.reset({
+      titulo: initialData?.titulo ?? "",
+      descricao: initialData?.descricao ?? "",
+    });
+  }, [initialData, form]);
 
   return (
     <FormProvider {...form}>

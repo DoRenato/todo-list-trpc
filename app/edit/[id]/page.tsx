@@ -35,7 +35,7 @@ export default function EditTaskPage() {
     onSuccess: async () => {
     //   await utils.task.list.invalidate();
     //   await utils.task.getById.invalidate({ id });
-      router.push("/");
+      router.replace("/");
     },
   });
 
