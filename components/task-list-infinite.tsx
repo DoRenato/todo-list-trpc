@@ -79,9 +79,9 @@ export default function TaskListInfinite({
     toast("Tarefa excluída com sucesso!");
   }
 
-//   if (status === "pending") {  // Possivel erro de execução
-//     return <p>Carregando tarefas...</p>;
-//   }
+  //   if (status === "pending") {  // Possivel erro de execução
+  //     return <p>Carregando tarefas...</p>;
+  //   }
 
   if (status === "error") {
     return <p className="text-red-500">Erro ao carregar tarefas.</p>;
@@ -94,40 +94,45 @@ export default function TaskListInfinite({
   return (
     <div className="w-full max-w-xl">
       <ul className="flex flex-col gap-5">
-      {tasks.map((task) => (
-        <li key={task.id}>
-          <Card className="mx-auto w-xl min-w-sm p-4">
-            <CardHeader>
-              <CardAction className="flex gap-5">
-                <Link
-                  href={`/edit/${task.id}`}
-                  className="hover:text-yellow-500"
-                >
-                  <Pencil />
-                </Link>
+        {tasks.map((task) => (
+          <li key={task.id}>
+            <Card className="mx-auto w-xl min-w-sm p-4">
+              <CardHeader>
+                <CardAction className="flex gap-5">
+                  <Link
+                    href={`/edit/${task.id}`}
+                    className="hover:text-yellow-500"
+                  >
+                    <Pencil />
+                  </Link>
 
-                <button
-                  onClick={() => handleDelete(task.id)}
-                  disabled={deleteTask.isPending}
-                  className="hover:cursor-pointer hover:text-red-500"
-                >
-                  {deleteTask.isPending ? "Excluindo..." : <Trash />}
-                </button>
-              </CardAction>
-              <CardTitle>{task.titulo}</CardTitle>
-              <CardDescription>
-                Criada em: {new Date(task.dataCriacao).toLocaleString("pt-BR")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {task.descricao && <p>{task.descricao}</p>}
-            </CardContent>
-          </Card>
-        </li>
-      ))}
-    </ul>
+                  <button
+                    onClick={() => handleDelete(task.id)}
+                    disabled={deleteTask.isPending}
+                    className="hover:cursor-pointer hover:text-red-500"
+                  >
+                    {deleteTask.isPending ? "Excluindo..." : <Trash />}
+                  </button>
+                </CardAction>
+                <CardTitle>{task.titulo}</CardTitle>
+                <CardDescription>
+                  Criada em:{" "}
+                  {new Date(task.dataCriacao).toLocaleString("pt-BR")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {task.descricao ? (
+                  <p>{task.descricao}</p>
+                ) : (
+                  <p>Sem descrição</p>
+                )}
+              </CardContent>
+            </Card>
+          </li>
+        ))}
+      </ul>
 
-      <div ref={loadMoreRef} className="h-10 flex items-center justify-center">
+      <div ref={loadMoreRef} className="flex h-10 items-center justify-center">
         {isFetchingNextPage && <p>Carregando mais...</p>}
         {!hasNextPage && <p>Você chegou ao fim.</p>}
       </div>
